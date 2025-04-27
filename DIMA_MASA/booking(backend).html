@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffbe33;
+            margin: 0;
+            padding: 0;
+            color: #1f1f1f;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #222831;
+            color: #ffffff;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .sidebar h1  {
+            font-size: 24px;
+            margin: 0 0 20px;
+            color: #ffbe33;
+        }
+        .sidebar a {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+        }
+        .sidebar a:last-child {
+            border-bottom: none;
+        }
+        .main {
+            margin-left: 200px;
+            padding: 20px;
+        }
+        .welcome {
+            font-size: 48px;
+            color: #ffffff;
+            margin: 20px 0;
+            text-align: center;
+        }
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .btn-green, .btn-red {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .btn-green {
+            background-color: #28a745; /* Green */
+        }
+
+        .btn-red {
+            background-color: #dc3545; /* Red */
+        }
+
+        .sort-button {
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 4px;
+            background-color: #222831;
+            color: #ffffff;
+            font-weight: bold;
+            border: none;
+            margin-bottom: 20px;
+        }
+        .bottom-links {
+            margin-top: auto;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="sidebar">
+    <h1><a href="backend.html"><span style="color:#ffbe33;">Pastalia</span></a></h1>
+    <a href="users.html">Users</a>
+    <a href="booking(backend).html">Book Tables</a>
+    <a href="accepted.html">Accepted Bookings</a>
+    <a href="rejected.html">Rejected Bookings</a>
+    <a href="backmenu.html">Menu</a>
+    <div class="bottom-links">
+        <a href="index.html">Log Out</a>
+    </div>
+</div>
+
+<div class="content">
+    <button class="sort-button" onclick="sortTableByDatetime()">Sort by Date & Time</button>
+    <div id="userTableContainer"></div>
+</div>
+
+<script>
+    // Global variable to store fetched data
+    let bookingData = [];
+
+    fetch('getbook.php')
+        .then(response => response.json())
+        .then(data => {
+            bookingData = data; // Store the fetched data in the global variable
+            const container = document.getElementById('userTableContainer');
+            container.innerHTML = createTable(bookingData);
+        })
+        .catch(error => console.error('Error fetching user data:', error));
+
+    function createTable(data) {
+        let table = '<table><tr><th>ID</th><th>NAME</th><th>PHONE</th><th>EMAIL</th><th># OF PERSON</th><th>DATE&TIME</th><th>NOTE</th><th>ACTION</th></tr>';
+        data.forEach(book_table => {
+            table += `<tr id="row-${book_table.id}">
+                        <td>${book_table.id}</td>
+                        <td>${book_table.name}</td>
+                        <td>${book_table.phone}</td>
+                        <td>${book_table.email}</td>
+                        <td>${book_table.num_of_person}</td>
+                        <td>${book_table.datetime}</td>
+                        <td>${book_table.note}</td>
+                        <td>
+                            <button class="btn-green" onclick="acceptBooking(${book_table.id}, '${book_table.name}', '${book_table.phone}', '${book_table.email}', '${book_table.num_of_person}', '${book_table.datetime}', '${book_table.note}')">Accept</button>
+                            <button class="btn-red" onclick="rejectBooking(${book_table.id}, '${book_table.name}', '${book_table.phone}', '${book_table.email}', '${book_table.num_of_person}', '${book_table.datetime}', '${book_table.note}')">Reject</button>
+                        </td>
+                    </tr>`;
+        });
+        table += '</table>';
+        return table;
+    }
+
+    function sortTableByDatetime() {
+        const sortedData = bookingData.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        const container = document.getElementById('userTableContainer');
+        container.innerHTML = createTable(sortedData);
+    }
+
+    function acceptBooking(id, name, phone, email, num_of_person, datetime, note) {
+        fetch('accept_booking.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, name, phone, email, num_of_person, datetime, note }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById(`row-${id}`).remove();
+                    alert(data.message);
+                    window.location.href = 'accepted.html';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error accepting booking:', error);
+                alert('Failed to accept booking. Please try again later.');
+            });
+    }
+
+    function rejectBooking(id, name, phone, email, num_of_person, datetime, note) {
+        fetch('rejected_booking.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, name, phone, email, num_of_person, datetime, note }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById(`row-${id}`).remove();
+                    alert(data.message);
+                    window.location.href = 'rejected.html';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error rejecting booking:', error);
+                alert('Failed to reject booking. Please try again later.');
+            });
+    }
+</script>
+
+</body>
+</html>

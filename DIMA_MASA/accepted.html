@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accepted Bookings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffbe33;
+            margin: 0;
+            padding: 0;
+            color: #1f1f1f;
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #222831;
+            color: #ffffff;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sidebar h1 {
+            font-size: 24px;
+            margin: 0 0 20px;
+            color: #ffbe33;
+        }
+        .sidebar a {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+        }
+        .sidebar a:last-child {
+            border-bottom: none;
+        }
+        .main {
+            margin-left: 200px;
+            padding: 20px;
+        }
+        .welcome {
+            font-size: 48px;
+            color: #ffffff;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .sort-button {
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 4px;
+            background-color: #222831;
+            color: #ffffff;
+            font-weight: bold;
+            border: none;
+            margin-bottom: 20px;
+        }
+        .delete-button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .delete-button:hover {
+            background-color: #c9302c;
+        }
+        .bottom-links {
+            margin-top: auto;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #222831;
+            color: #ffffff;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h1><a href="backend.html"><span style="color:#ffbe33;">Pastalia</span></a></h1>
+    <a href="users.html">Users</a>
+    <a href="booking(backend).html">Book Tables</a>
+    <a href="accepted.html">Accepted Bookings</a>
+    <a href="rejected.html">Rejected Bookings</a>
+    <a href="backmenu.html">Menu</a>
+    <div class="bottom-links">
+        <a href="index.html">Log Out</a>
+    </div>
+</div>
+<div class="content">
+    <button class="sort-button" onclick="sortTableByDatetime()">Sort by Date & Time</button>
+    <div id="userTableContainer"></div>
+</div>
+<script>
+    fetch('getaccept.php')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('userTableContainer');
+            container.innerHTML = createTable(data);
+            window.acceptedData = data; // Store the data globally for sorting
+        })
+        .catch(error => console.error('Error fetching user data:', error));
+
+    function createTable(data) {
+        let table = '<table><tr><th>ID</th><th>NAME</th><th>PHONE</th><th>EMAIL</th><th># OF PERSON</th><th>DATE&TIME</th><th>NOTE</th><th>ACTION</th></tr>';
+        data.forEach(accepted => {
+            table += `<tr id="row-${accepted.id}">
+                        <td>${accepted.id}</td>
+                        <td>${accepted.name}</td>
+                        <td>${accepted.phone}</td>
+                        <td>${accepted.email}</td>
+                        <td>${accepted.num_of_person}</td>
+                        <td>${accepted.datetime}</td>
+                        <td>${accepted.note}</td>
+                        <td>
+                            <button class="delete-button" onclick="deleteBooking(${accepted.id})">Delete</button>
+                        </td>
+                    </tr>`;
+        });
+        table += '</table>';
+        return table;
+    }
+
+    function sortTableByDatetime() {
+        const sortedData = window.acceptedData.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        const container = document.getElementById('userTableContainer');
+        container.innerHTML = createTable(sortedData);
+    }
+
+    function deleteBooking(id) {
+        if (confirm('Are you sure you want to delete this booking?')) {
+            fetch('deletebooking.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Booking deleted successfully');
+                        document.getElementById(`row-${id}`).remove();
+                    } else {
+                        alert('Error deleting booking');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+</body>
+</html>

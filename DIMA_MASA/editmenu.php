@@ -1,0 +1,35 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "restaurant";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$data = json_decode(file_get_contents("php://input"), true);
+$id = $data['id'];
+$name = $data['name'];
+$description = $data['description'];
+$category = $data['category'];
+$price = $data['price'];
+
+$sql = "UPDATE menu SET name=?, description=?, category=?, price=? WHERE id=?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sssdi", $name, $description, $category, $price, $id);
+
+$response = [];
+if ($stmt->execute()) {
+    $response['success'] = true;
+} else {
+    $response['success'] = false;
+}
+
+echo json_encode($response);
+
+$stmt->close();
+$conn->close();
+?>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastalia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffbe33;
+            margin: 0;
+            padding: 0;
+            color: #1f1f1f;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #222831;
+            color: #ffffff;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+        }
+        .sidebar h1 {
+            font-size: 24px;
+            margin: 0 0 20px;
+            color: #ffbe33;
+        }
+        .sidebar a {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+        }
+        .sidebar a:last-child {
+            border-bottom: none;
+        }
+        .main {
+            margin-left: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: calc(100% - 200px);
+            background-color: #ffbe33;
+        }
+        .welcome {
+            font-size: 60px;
+            color: #222831;
+            font-family: 'Pacifico', cursive;
+            text-align: center;
+            margin: 0;
+        }
+        .bottom-links {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div>
+        <h1><a href="empbackend.html"><span style="color:#ffbe33;">Pastalia</span></a></h1>
+        <a href="booking(backend)2.html">Book Tables</a>
+        <a href="accepted2.html">Accepted Bookings</a>
+        <a href="rejected2.html">Rejected Bookings</a>
+
+    </div>
+    <div class="bottom-links">
+        <a href="index.html">Log Out</a>
+    </div>
+</div>
+<div class="main">
+    <div class="welcome">
+        Welcome to Pastalia,<br>Your Home for Delicious Pasta!
+    </div>
+</div>
+</body>
+</html>

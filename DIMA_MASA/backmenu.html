@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffbe33;
+            margin: 0;
+            padding: 0;
+            color: #1f1f1f;
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #222831;
+            color: #ffffff;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sidebar h1 {
+            font-size: 24px;
+            margin: 0 0 20px;
+            color: #ffbe33;
+        }
+        .sidebar a {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+        }
+        .sidebar a:last-child {
+            border-bottom: none;
+        }
+        .main {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .welcome {
+            font-size: 48px;
+            color: #ffffff;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .add-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: #222831;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-button:hover {
+            background-color: #222831;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-button {
+            background-color: #5bc0de;
+            color: white;
+        }
+        .edit-button:hover {
+            background-color: #3e94bb;
+        }
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+        }
+        .delete-button:hover {
+            background-color: #da190b;
+        }
+        .bottom-links {
+            margin-top: auto;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #222831;
+            color: #ffffff;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h1><a href="backend.html"><span style="color:#ffbe33;">Pastalia</span></a></h1>
+    <a href="users.html">Users</a>
+    <a href="booking(backend).html">Book Tables</a>
+    <a href="accepted.html">Accepted Bookings</a>
+    <a href="rejected.html">Rejected Bookings</a>
+    <a href="backmenu.html">Menu</a>
+    <div class="bottom-links">
+        <a href="index.html">Log Out</a>
+    </div>
+</div>
+<div class="content">
+    <button class="add-button" onclick="addNewDish()">Add New Dish</button>
+    <div id="menuTableContainer"></div>
+</div>
+
+
+<script>
+    fetch('getmenu.php')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('menuTableContainer');
+            container.innerHTML = createTable(data);
+        })
+        .catch(error => console.error('Error fetching menu data:', error));
+
+    function createTable(data) {
+        let table = '<table><tr><th>ID</th><th>Name</th><th>Description</th><th>Category</th><th>Price</th><th>Actions</th></tr>';
+        data.forEach(menu => {
+            table += `<tr>
+                        <td>${menu.id}</td>
+                        <td>${menu.name}</td>
+                        <td>${menu.description}</td>
+                        <td>${menu.category}</td>
+                        <td>${menu.price}</td>
+                        <td>
+                            <button class="edit-button" onclick="editMenu(${menu.id})">Edit</button>
+                            <button class="delete-button" onclick="deleteMenu(${menu.id})">Delete</button>
+                        </td>
+                      </tr>`;
+        });
+        table += '</table>';
+        return table;
+    }
+
+    function addNewDish() {
+        window.location.href = 'ManageMenu.php'; //
+    }
+    function editMenu(id) {
+        const newName = prompt("Enter new name:");
+        const newDescription = prompt("Enter new description:");
+        const newCategory = prompt("Enter new category:");
+        const newPrice = prompt("Enter new price:");
+
+        if (newName !== null && newDescription !== null && newCategory !== null && newPrice !== null) {
+            fetch('editmenu.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, name: newName, description: newDescription, category: newCategory, price: newPrice })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Menu updated successfully');
+                        location.reload(); // Reload the page to see changes
+                    } else {
+                        alert('Error updating menu');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function deleteMenu(id) {
+        if (confirm('Are you sure you want to delete this menu item?')) {
+            fetch('deletemenu.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Menu item deleted successfully');
+                        location.reload(); // Reload the page to see changes
+                    } else {
+                        alert('Error deleting menu item');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+</body>
+</html>
